@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant | Premium Chat</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <button id="new-chat-btn" class="new-chat-btn">
+                    <i class="fas fa-plus"></i> New Chat
+                </button>
+            </div>
+            <div class="sidebar-content">
+                <div class="history-label">Recent Chats</div>
+                <div id="history-list" class="history-list">
+                    <!-- Sessions will be loaded here -->
+                </div>
+            </div>
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <img src="https://ui-avatars.com/api/?name=User&background=7c3aed&color=fff" alt="User">
+                    </div>
+                    <div class="user-info">
+                        <span class="user-name">Guest User</span>
+                        <span class="user-status">Online</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <div class="chat-container">
+            <!-- Header -->
+            <header class="chat-header">
+                <div class="header-info">
+                    <button id="menu-toggle" class="menu-toggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="bot-avatar">
+                        <img src="{{ url_for('static', filename='img/ai-assistant.gif') }}" alt="Bot">
+                    </div>
+                    <div class="header-text">
+                        <h2>AI Assistant</h2>
+                        <div class="status-indicator">
+                            <span class="dot"></span>
+                            <span>Online & Ready</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="mode-dropdown">
+                        <button class="dropdown-trigger" id="mode-btn">
+                            <span id="current-mode-text">General Assistant</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </button>
+                        <div class="dropdown-content">
+                            <div class="dropdown-item active" data-mode="general">
+                                <i class="fas fa-robot"></i> General Assistant
+                            </div>
+                            <div class="dropdown-item" data-mode="expert">
+                                <i class="fas fa-brain"></i> Expert Mode
+                            </div>
+                            <div class="dropdown-item" data-mode="support">
+                                <i class="fas fa-headset"></i> Customer Support
+                            </div>
+                        </div>
+                    </div>
+                    <button title="Clear Chat" id="clear-chat-btn"
+                        style="background:none; border:none; color:var(--text-dim); cursor:pointer; font-size:1.1rem; margin-left: 10px;">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Expert Setup Bar (Hidden by default) -->
+            <div id="expert-setup-bar" class="setup-bar" style="display: none;">
+                <div class="setup-content" id="setup-input-group">
+                    <span>Domain of Expertise:</span>
+                    <input type="text" id="expert-domain-input" placeholder="e.g. Science, Cricket, Coding...">
+                    <button id="set-domain-btn">Set</button>
+                </div>
+                <div class="setup-content" id="setup-display-group" style="display: none;">
+                    <span>Expertise: <strong id="active-domain-text" style="color: var(--primary-light);"></strong></span>
+                    <button id="edit-domain-btn" style="background: rgba(255,255,255,0.1); margin-left: 10px;">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </div>
+            </div>
+
+            <!-- Messages Area -->
+            <main class="chat-messages" id="chat-messages">
+                <!-- Messages will load here -->
+            </main>
+
+            <!-- Input Area -->
+            <footer class="chat-input-area">
+                <form id="chat-form">
+                    <div class="input-container">
+                        <i class="fas fa-sparkles" style="color: var(--primary-color);"></i>
+                        <input type="text" id="user-input" placeholder="Type a message..." autocomplete="off" required>
+                        <button type="submit" class="send-btn" id="send-btn">
+                            <i class="fas fa-paper-plane" id="send-icon"></i>
+                        </button>
+                    </div>
+                </form>
+            </footer>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+
+</html>

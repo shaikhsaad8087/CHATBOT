@@ -1,0 +1,14 @@
+{
+  "name": "ai-chatbot-pro",
+  "version": "1.0.0",
+  "description": "A premium AI Chatbot built with Flask and Groq",
+  "main": "app.py",
+  "scripts": {
+    "start": "python app.py",
+    "dev": "python app.py",
+    "install-deps": "pip install -r requirements.txt"
+  },
+  "keywords": ["ai", "chatbot", "flask", "groq", "llama3"],
+  "author": "AI Developer",
+  "license": "MIT"
+}
