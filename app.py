@@ -7,10 +7,17 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
+application = app
 
-# Initialize the model
-model = ChatGroq(model="llama-3.1-8b-instant")
+# Initialize the model lazily to prevent startup crashes if the key is missing
+def get_model():
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        return None
+    return ChatGroq(model="llama-3.1-8b-instant", groq_api_key=api_key)
+
+model = get_model()
 
 # Bot Prompt Templates
 PROMPTS = {
@@ -37,8 +44,16 @@ PROMPTS = {
 
 # Directory for persistent history
 HISTORY_DIR = 'history'
-if not os.path.exists(HISTORY_DIR):
-    os.makedirs(HISTORY_DIR)
+# Only attempt to create directory if we aren't in a serverless environment
+# or use /tmp if we really need a temporary writeable space
+IS_VERCEL = "VERCEL" in os.environ
+
+if not IS_VERCEL:
+    if not os.path.exists(HISTORY_DIR):
+        try:
+            os.makedirs(HISTORY_DIR)
+        except Exception as e:
+            print(f"Warning: Could not create history directory: {e}")
 
 chat_sessions = {}
 
@@ -63,14 +78,19 @@ def load_history(session_id):
     return history
 
 def save_message_to_file(session_id, sender, content):
-    file_path = os.path.join(HISTORY_DIR, f"{session_id}.txt")
-    with open(file_path, 'a', encoding='utf-8') as f:
-        # Replace newlines with spaces for storage consistency
-        clean_content = content.replace('\n', ' ')
-        if sender == 'user':
-            f.write(f'HumanMessage(content="{clean_content}")\n')
-        else:
-            f.write(f'AIMessage(content="{clean_content}")\n')
+    if IS_VERCEL:
+        return # Skip file persistence on Vercel
+    
+    try:
+        file_path = os.path.join(HISTORY_DIR, f"{session_id}.txt")
+        with open(file_path, 'a', encoding='utf-8') as f:
+            clean_content = content.replace('\n', ' ')
+            if sender == 'user':
+                f.write(f'HumanMessage(content="{clean_content}")\n')
+            else:
+                f.write(f'AIMessage(content="{clean_content}")\n')
+    except Exception as e:
+        print(f"Error saving to file: {e}")
 
 def serialize_message(msg):
     if isinstance(msg, HumanMessage):
@@ -81,7 +101,18 @@ def serialize_message(msg):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    try:
+        return render_template('index.html')
+    except Exception as e:
+        return f"Template Error: {str(e)}", 500
+
+@app.route('/health')
+def health():
+    return jsonify({
+        "status": "healthy",
+        "is_vercel": IS_VERCEL,
+        "has_api_key": os.getenv("GROQ_API_KEY") is not None
+    })
 
 @app.route('/sessions', methods=['GET'])
 def list_sessions():
@@ -132,7 +163,14 @@ def chat():
     prompt_template = PROMPTS.get(bot_type, PROMPTS['general'])
 
     try:
-        chain = prompt_template | model
+        current_model = get_model()
+        if not current_model:
+            return jsonify({
+                'status': 'error',
+                'message': 'GROQ_API_KEY is missing in Vercel Environment Variables. Please add it in the Vercel Dashboard.'
+            }), 500
+
+        chain = prompt_template | current_model
         result = chain.invoke({
             "chat_history": chat_sessions[session_id],
             "message": user_message,
