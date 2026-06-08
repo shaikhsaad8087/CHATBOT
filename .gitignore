@@ -159,3 +159,5 @@ yarn-error.log*
 chat_history.txt
 history/
 .env
+# Local Netlify folder
+.netlify
