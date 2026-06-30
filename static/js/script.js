@@ -365,13 +365,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 loadSessions(); // Refresh list to show new chat if first message
             } else {
-                addMessage('Sorry, I encountered an error. Please try again.', 'bot');
+                addMessage(`Sorry, I encountered an error: ${data.message || 'Please try again.'}`, 'bot');
                 stopGeneration();
             }
         } catch (error) {
             if (typingMsg) typingMsg.remove();
             botAvatarMain.classList.remove('thinking');
-            addMessage('Error connecting to the server.', 'bot');
+            addMessage(`Error connecting to the server: ${error.message}`, 'bot');
             console.error('Error:', error);
             stopGeneration();
         }
